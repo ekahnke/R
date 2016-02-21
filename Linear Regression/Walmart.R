@@ -1,0 +1,11 @@
+walmart=read.csv('Walmart.csv')
+attach(walmart)
+lm1 =lm(log(Sales)~log(Promotion.Index)+Walmart, walmart)
+lm2 =lm(log(Sales)~log(Promotion.Index)+Walmart+log(FeatureAdvertising.Index)+Holiday, walmart)
+lm3 =lm(log(Sales)~log(Promotion.Index)+Walmart+log(FeatureAdvertising.Index)+Holiday+(log(Promotion.Index)*Walmart), walmart)
+lm4 =lm(log(Sales)~log(Promotion.Index)+Walmart+log(FeatureAdvertising.Index)+Holiday+(log(Promotion.Index)*Walmart)+(log(FeatureAdvertising.Index)*Walmart), walmart)
+
+summary(lm1)
+summary(lm2)
+summary(lm3)
+summary(lm4)

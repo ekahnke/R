@@ -1,0 +1,91 @@
+---
+title: "Exercises 1"
+author: "Erik Kahnke"
+date: "August 7, 2015"
+output: html_document
+---
+
+##Clustering and PCA
+
+For this exercise I decided to use K Means clustering and PCA algorithms. For the K Means clustering, I set K=2 to assess how well K Means clustering determines reds versus whites and again where K=7 to determine if it would cluster around the seven different quality scores that were assigned to the data. When determining clusters to show the different quality scores, I chose 7 because the quality values only range from 3 to 9 in the dataset even though quality is assessed on a scale of 1 to 10. I also tried to determine if K Means clustering when K=2 is capable of sorting the higher quality wines from the lower quality wines.
+
+```{r, include=FALSE}
+wine = read.csv('wine.csv', header=TRUE)
+x = wine[,-(12:13)]
+x = scale(x, center=TRUE, scale=TRUE)
+clust2 = kmeans(x, 2, nstart=500)
+clust7 = kmeans(x, 7, nstart=500)
+pc1 = prcomp(x, scale=TRUE)
+loadings = pc1$rotation
+scores = pc1$x
+```
+
+
+Below, we can see the K-Means Clustering algorithm's attempt to determine wine color. I plotted color against alcohol content to give the y-axis a continuous numerical scale.
+
+```{r, echo=FALSE}
+qplot(color, alcohol, data=wine, color=factor(clust2$cluster))
+```
+
+And now for PCA.
+
+```{r, echo=FALSE}
+qplot(scores[,1], scores[,2], data=wine, color=wine$color, xlab='Component 1', ylab='Component 2')
+```
+
+Based on the above visuals, K Means Clustering is more easily able to distinguish reds versus whites. We can see that K Means better determines wine color because there are fewer errors or incorrect classifications of red versus white.
+
+Now lets consider how well PCA and K Means clustering determine wine by quality score. The first plot shows K Means (when K=2) attempt to sort the higher quality wines from the lower quality wines. The second plot below shows K Means (when K=7) attempt to cluster around wine quality scores and the third plot shows PCA's attempt to classify wine by quality. 
+
+```{r, echo=FALSE}
+qplot(quality, alcohol, data=wine, color=factor(clust2$cluster))
+qplot(quality, alcohol, data=wine, color=factor(clust7$cluster))
+qplot(scores[,1], scores[,2], data=wine, color=wine$quality, xlab='Component 1', ylab='Component 2')
+```
+
+Based on the above three visuals, we cannot say that either K Means or PCA is capable of determining wines by quality/quality score.
+
+
+
+##Market Segmentation
+
+Our task to identify any interesting market segments that appear to stand out in NutrientH2O's social-media audience. To do this we will use principal component analysis to identify market segements. We will use the category of a follower's tweets to identify prominent market segments among NutrientH2O's social-media audience. We will look at the first three components to see the top tweet categories associated with each component. The first component will represent NutrientH20's largest market segment and each subsequent component represents a smaller market segment. Let's see which tweet categories are associated with the first three components.
+
+```{r, echo=FALSE}
+tweets = read.csv("social_marketing.csv", header=TRUE, row.names=1)
+Z = tweets/rowSums(tweets)
+pca= prcomp(Z, scale=TRUE)
+loadings = pca$rotation
+scores = pca$x
+```
+
+NutrientH20's most prominent market segment is tweeting about the following categories most often:
+
+```{r, echo=FALSE}
+o1 = order(loadings[,1])
+colnames(Z)[tail(o1,5)]
+```
+
+NutrientH2O's most prominent market segement has a broad range of tweet categories. We can possibly interpret this market segment as homes where children are still living with parents.
+
+
+
+NutrientH20's second prominent market segment is tweeting about the following categories most often:
+
+```{r, echo=FALSE}
+o2 = order(loadings[,2])
+colnames(Z)[tail(o2,5)]
+```
+
+The second prominent market segement has a slightly more focused range of tweet categories. We can possibly interpret this market segment as young adults.
+
+
+
+NutrientH20's third prominent market segment is tweeting about the following categories most often:
+
+```{r, echo=FALSE}
+o3 = order(loadings[,3])
+colnames(Z)[tail(o3,5)]
+```
+
+The third prominent market segement has an even more focused range of tweet categories than the previous two segments. We can possibly interpret this market segment as healty-lifestyle enthusiasts.

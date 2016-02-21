@@ -1,0 +1,52 @@
+---
+title: "Association Rule Mining"
+author: "Erik Kahnke"
+date: "August 18, 2015"
+output: word_document
+---
+
+##Practice with Association Rule Mining
+
+```{r, include=FALSE}
+library(arules)
+```
+I am looking at the groceries data to try to identify any interesting association rules for the shopping baskets in the dataset. I ran apriori with support=.005, confidence=.5 and maxlen=4. Let's see which association rules are identified.
+
+```{r, echo=FALSE}
+groceries <- read.transactions("groceries.txt", format='basket', sep=',')
+groceries <- groceries[!duplicated(groceries)]
+grocrules <- apriori(groceries, parameter=list(support=.008, confidence=.55, maxlen=6))
+inspect(grocrules)
+```
+
+Let's see which association rules are more statistically important. First, we look at those rules with the higest lift. I chose to look at rules with support greater than 2.3 because it yeilds only the top rules in terms of lift.
+
+```{r, echo=FALSE}
+## Choose a subset
+inspect(subset(grocrules, subset=lift > 2.3))
+```
+
+Now, lets look at the rules with the highest confidence.I chose to look at rules with confidence greater than 64% because it yeilded the rules with the highes confidence.
+
+```{r, echo=FALSE}
+inspect(subset(grocrules, subset=confidence > 0.64))
+```
+
+Lastly, let's look at rules with high support and high confidence measures. I chose to look at rules with support greater than 0.1 andconfidence greater than 62% .
+
+```{r, echo=FALSE}
+inspect(subset(grocrules, subset=support > .01 & confidence > 0.62))
+```
+From our results we can identify the following rules as the strongest association rules:
+
+- {citrus fruit,root vegetables} => {other vegetables}
+- {root vegetables,tropical fruit} => {other vegetables}
+- {citrus fruit,root vegetables,whole milk} => {other vegetables}
+- {root vegetables,tropical fruit,whole milk}  => {other vegetables}
+- {butter,whipped/sour cream} => {whole milk}
+- {pip fruit,whipped/sour cream} => {whole milk}
+- {butter,root vegetables}  => {whole milk}
+- {butter,yogurt} => {whole milk}
+- {other vegetables,tropical fruit,yogurt} => {whole milk}
+
+These rules are not surprising as many of these items are commonly purchased together.

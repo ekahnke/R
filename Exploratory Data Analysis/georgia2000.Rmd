@@ -1,0 +1,85 @@
+---
+title: "Exercises 1"
+author: "Erik Kahnke"
+date: "August 7, 2015"
+output: html_document
+---
+
+##Exploratory Analysis
+
+We are looking at Georgia's county-level voting data from the 2000 presidential election and trying to investigate whether voter undercount was more prevalent among a certain equipment type, poor communities, and minority communities. For this, we will focus on the following attributes of the dataset:
+
+- equip: voting equipment (lever, optical, paper, punch card)
+- poor: coded 1 if more than 25% of the residents in a county live below 1.5 times the federal poverty line; coded 0 otherwise
+- perAA: percent of people in the county who are African-American
+- undercount: difference between ballots cast and votes recorded
+
+After adding a scaled column for voter undercount, we can begin our analysis.
+
+```{r, include=FALSE}
+library(mosaic)
+library(foreach)
+```
+
+```{r, echo=FALSE}
+voting= read.csv('georgia2000.csv', header=TRUE)
+voting$undercount = voting$ballots-voting$votes
+voting$undercount = scale(voting$undercount)
+```
+
+Now, let's plot undercount against perAA to evaluate the relation of undercount and minority communities.
+
+```{r, echo=FALSE}
+plot(voting$perAA,voting$undercount)
+```
+
+It does not seem that there is much of a correltion here. Let's try to confirm this with the Spearman correlation.
+
+```{r, echo=FALSE}
+cor(voting$perAA,voting$undercount,method ='spearman')
+```
+
+Now let's take a look at a boxplot of undercount against equipment type.
+
+```{r, echo=FALSE}
+bwplot(undercount~equip, data=voting)
+```
+
+Clearly, counties with higher incidences of voter undercount occored most frequently in counties that relied upon a punch vote-tallying system.
+
+
+Now let's take a look at a plot of undercount against poor. Remember, values of 0 correspond to non-poor communities and values of 1 correspont to poor communities.
+
+```{r, echo=FALSE}
+plot(voting$poor,voting$undercount)
+```
+
+It seems that voter undercount is higher in non-poor communities.
+
+Now let's look at equipment type in poor and non-poor communities.
+
+```{r, echo=FALSE}
+table1 = xtabs(~equip + poor, data=voting)
+table1
+plot(table1)
+```
+
+The punch equipment type appears more often in non-poor communities.
+
+
+Let's now consider the following 2 plots. The first is a plot of undercount against perAA stratified by equipment type, and the second is a plot of undercount against perAA stratified by poor.
+
+```{r, echo=FALSE}
+xyplot(undercount ~ perAA | equip, data=voting)
+xyplot(undercount ~ perAA | poor, data=voting)
+```
+
+The first plot confirms our analysis that incidences of undercount were highest in counties relying upon the punch voting method. The second confirms our analysis that incidences of undercount were highest in non-poor counties. Interestingly, in both plots (the PUNCH partition in the first polt and the non-poor or left partition of the second plot) incidences of high undercount were associated with higher perAA values. However, we still cannot claim that there is a high correlation between undercount and perAA.
+
+To Summarize:
+
+```{r, echo=FALSE}
+boxplot(undercount~equip:poor, data=voting)
+```
+
+The above boxplot demonstrates that voter undercount was highest in non-poor counties using the punch voting system. Although perAA vaules tended to be higher in those communities, undercount and perAA are not correlated.

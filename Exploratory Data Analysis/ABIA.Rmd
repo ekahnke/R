@@ -1,0 +1,43 @@
+---
+title: "Exercises 2"
+author: "Erik Kahnke"
+date: "August 18, 2015"
+output: word_document
+---
+
+##Flights at ABIA
+
+In the Austin airport data I decided to focus my analysis on departure delays because it has the highest impact on customer experience. I want to look at departure delays by carrier to identify any carriers that tend to have the fewest departure delays and those that tend to have the most departure delays by frequency and magnitude.  From there I want to identify the best and worst months and days of the week to fly those carriers in terms of departure delay.
+
+```{r, include=FALSE}
+library(ggplot2)
+```
+
+The below visual helps identify the best and worst carriers by departure delay in both frequency and magnitude.
+
+```{r, echo=FALSE}
+austin = read.csv('ABIA.csv', header=TRUE)
+austin[is.na(austin)] <- 0
+attach(austin)
+ggplot(austin, aes(UniqueCarrier,DepDelay)) + geom_bin2d() + ylab("Departure Delay") + xlab("Carrier") + ggtitle("Departure Delay by Carrier") + theme(axis.text.x  = element_text(angle=90))
+```
+
+We can see that the best carrier or the ones that have the lowest frequency and magnitude of departure delay are F9, NW and US. The worst carriers are WN and AA. I will focus on the best carriers for the sake of future customers. The carrier codes for the best carriers correspond to Frontier Airlines, Northwest Airlines and US Airways respectively.
+
+After creating a subset of flight info from the three best carriers, we look at average departure delays over all three carriers by days of the week and months of the year to identify the best and worst times to fly.
+
+```{r, echo=FALSE}
+austin_f9 = austin[which(UniqueCarrier == 'F9'),]
+austin_nw = austin[which(UniqueCarrier == 'NW'),]
+austin_us = austin[which(UniqueCarrier == 'US'),]
+austin_best = merge(austin_f9,austin_nw, all=TRUE)
+austin_best = merge(austin_best,austin_us, all=TRUE)
+ggplot(data = austin_best, aes(austin_best$DayOfWeek, austin_best$DepDelay)) + stat_summary(fun.y = mean, geom = "bar", fill='blue') + scale_x_discrete("Day of Week", breaks=1:7, labels=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))  + scale_y_continuous("Average Departure Delay in Minutes")
+```
+
+```{r, echo=FALSE}
+ggplot(data = austin_best, aes(austin_best$Month, austin_best$DepDelay)) + stat_summary(fun.y = mean, geom = "bar", fill='blue') + scale_x_discrete("Month", breaks=1:12, labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) + scale_y_continuous("Average Departure Delay in Minutes")
+```
+The best day of the week to fly is Saturday, and the worst days to fly are Thursday and Saturday. This is not surprising because Thursday and Sunday are typically the travel days for business travel. THe best months to fly these carriers are during September and October when flights actually leave earlier than anticipated. The worst month to fly is during the holiday season in December.  
+
+My analysis has shown that Frontier Airlines, Northwest Airlines and US Airways are the best carriers to fly out of Austin-Bergstrom Interational Airport to avoid departure delays. Furthermore, to avoid departure delays when flying these carriers it is best to fly on Saturdays during September and October and worst to fly on Thursdays and Saturdays during December.
